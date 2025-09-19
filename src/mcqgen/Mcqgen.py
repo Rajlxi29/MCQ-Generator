@@ -19,8 +19,8 @@ load_dotenv()
 llm = ChatOpenAI(
     model =  "deepseek/deepseek-chat-v3.1:free",
     temperature = 0.8,
-    api_key=os.getenv("OPENAI_API_KEY"),
-    base_url="https://openrouter.ai/api/v1"
+    openai_api_key=os.getenv("OPENAI_API_KEY"),
+    openai_api_base=os.getenv("OPENAI_API_BASE")
 )
 
 quiz_template = """
