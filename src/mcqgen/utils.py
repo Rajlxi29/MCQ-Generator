@@ -3,6 +3,10 @@ import traceback
 import PyPDF2
 import json
 import re
+import reportlab
+from reportlab.lib.pagesizes import letter
+from reportlab.pdfgen import canvas
+import io
 
 
 def read_file(file):
@@ -62,3 +66,36 @@ def get_table_data(quiz_str):
         import traceback
         traceback.print_exception(type(e), e, e.__traceback__)
         return None
+    
+def create_pdf(df):
+    buffer = io.BytesIO()
+    pdf = canvas.Canvas(buffer, pagesize=letter)
+    width, height = letter
+
+    pdf.setFont("Helvetica-Bold", 16)
+    pdf.drawString(200, height - 50, "Generated MCQs")
+
+    pdf.setFont("Helvetica", 12)
+    y = height - 100
+
+    for idx, row in df.iterrows():
+        pdf.drawString(50, y, f"Q{idx}. {row['MCQ']}")
+        y -= 20
+
+        for opt_line in row['Choices'].split("\n"):
+            pdf.drawString(70, y, f"   {opt_line}")
+            y -= 15
+
+        pdf.setFillColorRGB(0, 0.5, 0) 
+        pdf.drawString(70, y, f"Correct: {row['Correct']}")
+        pdf.setFillColorRGB(0, 0, 0)
+        y -= 30
+
+        if y < 100:
+            pdf.showPage()
+            pdf.setFont("Helvetica", 12)
+            y = height - 50
+
+    pdf.save()
+    buffer.seek(0)
+    return buffer
